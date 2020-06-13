@@ -1,0 +1,99 @@
+#include <iostream>
+#include <string>
+#include <curl/curl.h>
+#include <json/json.h>
+
+static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp){
+    ((std::string*)userp)->append((char*)contents, size * nmemb);
+    return size * nmemb;
+}
+
+int main(void){
+    CURL *curl;
+    CURLcode res;
+    std::string readBuffer;
+    Json::CharReaderBuilder rBuilder;
+    Json::Value root;
+    JSONCPP_STRING errs;
+    
+    curl = curl_easy_init();
+    if(curl) {
+        curl_easy_setopt(curl, CURLOPT_URL, "http://tmi.twitch.tv/group/user/jpelizza/chatters");
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+        res = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+
+        std::cout << readBuffer << std::endl;
+    }
+    std::stringstream s(readBuffer);
+    Json::parseFromStream(rBuilder, s, &root, &errs);
+
+    Json::Value chatters = root.get("chatter_count",&root);
+    std::cout << chatters.toStyledString() << std::endl;
+    // Json::Value moderators = root.get("moderators",&root);
+    // std::cout << moderators.asString() << std::endl;
+    // Json::Value::Members mods = moderators.getMemberNames();
+    
+    // std::cout << moderators[0] << std::endl;
+
+    return 0;
+}
+
+
+CURL EXAMPLE 2(VOU UTILIZAR)
+
+void bot::startupIDandFollow(){
+
+    CURL *curl;
+    std::string readBuffer;
+    Json::CharReaderBuilder rBuilder;
+    Json::Value root;
+    JSONCPP_STRING errs;
+    struct curl_slist* headers = NULL;
+    curl = curl_easy_init();
+    if(curl) {
+        std::string uri = "https://id.twitch.tv/oauth2/validate";
+        headers = curl_slist_append(headers, ("Authorization: OAuth " + oauth.substr(6)).c_str() );
+        curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+        curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+
+        std::stringstream s(readBuffer);
+        Json::parseFromStream(rBuilder, s, &root, &errs);
+        clientID = root.get("client_id",root).asString();
+        userID = root.get("user_id",root).asString();
+    }
+}
+
+CURL EXEMPLO 3 (VOU USAR EM ALGUM PONTO)
+static int parseNumber(std::string clientID,std::string userID, Json::Value *name){
+    CURL *curl;
+    std::string readBuffer;
+    Json::CharReaderBuilder rBuilder;
+    Json::Value root;
+    struct curl_slist* headers = NULL;
+    JSONCPP_STRING errs;
+    curl = curl_easy_init();
+    if(curl) {
+        std::string uri = "https://api.twitch.tv/kraken/channels/"+ userID +"/follows";
+        headers = curl_slist_append(headers, "Accept: application/vnd.twitchtv.v5+json");
+        headers = curl_slist_append(headers, ("Client-ID: " + clientID).c_str());
+        curl_easy_setopt(curl, CURLOPT_URL, uri.c_str());
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+        curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+
+
+        std::stringstream s(readBuffer);
+        Json::parseFromStream(rBuilder, s, &root, &errs);
+        *name = root;
+        return root.get("_total",root).asInt();
+    }
+    return -1;
+}
