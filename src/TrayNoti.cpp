@@ -37,59 +37,91 @@ TrayNoti::TrayNoti(std::string iconPath){
 void TrayNoti::addToActionList(std::vector<struct liveChannelInfo> lciVec){
     QAction *action = new QAction();
     QSignalMapper* signalMapper = new QSignalMapper();
+    bool aux = false;
 
     for(auto vecPointer = lciVec.begin(); vecPointer!=lciVec.end(); vecPointer++){
-        action->setIcon(QIcon((iconPath+(*vecPointer).userId+".png").c_str()));
-        action->setText((*vecPointer).userName.c_str());
-        action->setData(dataN++);
-        this->auxString = (*(vecPointer)).userName;
-        QObject::connect(action,&QAction::triggered,this,[this](){TrayNoti::trayOpenLink(auxString);});
-        actionVec.push_back(action);
-        action = new QAction();
-    }
 
-}
-
-void TrayNoti::addToMenu(){
-    
-    for(auto vecPointer = actionVec.begin(); vecPointer != actionVec.end();vecPointer++){
-        trayContextMenu->addAction(*(vecPointer));
-    }
-
-    std::cout << actionVec.size() << " " << trayContextMenu->actions().count() << std::endl;
-    this->actionVec.clear();
-}
-
-void TrayNoti::cleanMenu(std::vector<struct liveChannelInfo> lciVec){
-    bool aux = false;
-    auto trayPointer = trayContextMenu->actions().begin();
-    for(int i = 0 ; i<trayContextMenu->actions().size() ; i++,trayPointer++ ){
-        for(auto it = lciVec.begin(); it!= lciVec.end(); it++){
-            std::cout << trayContextMenu->actions().size()  << std::endl;
-            if(!(*it).userName.compare((*trayPointer)->text().toStdString())){
+        for(auto it = trayContextMenu->actions().begin(); it!= trayContextMenu->actions().end(); it++){
+            if(!(*vecPointer).userName.compare((*it)->text().toStdString())){
                 aux = true;
             }
         }
         if(!aux){
-            trayContextMenu->removeAction(trayContextMenu->actions().first());
+            action->setIcon(QIcon((iconPath+(*vecPointer).userId+".png").c_str()));
+            action->setText((*vecPointer).userName.c_str());
+            this->auxString = (*(vecPointer)).userName;
+            QObject::connect(action,&QAction::triggered,this,[this](){TrayNoti::trayOpenLink(auxString);});
+            actionVec.push_back(action);
+            action = new QAction();
         }
         aux = false;
     }
 }
 
+void TrayNoti::addToMenu(){
+    for(auto vecPointer = actionVec.begin(); vecPointer != actionVec.end();vecPointer++){
+        trayContextMenu->addAction(*(vecPointer));
+    }
+    this->actionVec.clear();
+}
+
+void TrayNoti::cleanMenu(std::vector<struct liveChannelInfo> lciVec){
+    bool aux = false;
+    int counter = 0;
+    auto trayPointer = trayContextMenu->actions().begin();
+
+    for(auto trayPointer = trayContextMenu->actions().begin();
+        trayPointer!=trayContextMenu->actions().end();
+        trayPointer++ ){
+
+        std::string auxString = (*trayPointer)->text().toStdString();
+
+        for(auto it = lciVec.begin(); it!= lciVec.end(); it++){
+            if(!(*it).userName.compare((auxString))){
+                aux = true;
+            }
+        }
+
+        if(!aux){
+            trayContextMenu->actions().erase(trayPointer);
+        }
+        aux = false;
+    }
+}
+
+std::vector<QAction*> TrayNoti::getActionVec(){
+    return actionVec;
+}
+
 void TrayNoti::trayOpenLink(std::string chanName){
-    system(("midori https://twitch.tv/"+chanName).c_str());
+    system(("firefox https://twitch.tv/"+chanName).c_str());
 }
 
-void TrayNoti::changeIcon(std::string newIconName){
-    QIcon swapIcon;
-    swapIcon.addFile(newIconName.c_str(),QSize(22,22));
-    trayIcon->setIcon(swapIcon);
+void TrayNoti::notiIcon(){
+    std::cout << "Stated notiIcon\n";
+    QIcon *swapIcon = new QIcon;
+    swapIcon->addFile(("./twiNotiIcons/" + gayness[NotiPoint] + "/" + states[state]+ ".png").c_str(),QSize(22,22));
+    trayIcon->setIcon(*swapIcon);
+    sleep(1);
+    std::cout << "Middle notiIcon\n";
+    swapIcon = new QIcon;
+    swapIcon->addFile(("./twiNotiIcons/" + gayness[gaynessPoint] + "/" + states[state]+ ".png").c_str(),QSize(22,22));
+    trayIcon->setIcon(*swapIcon);
+
+    std::cout << "Ended notiIcon\n";
 }
 
+void TrayNoti::changeIcon(int newIconState){
+    setIconState(newIconState);
+    notiIcon();
+}
+
+void TrayNoti::setIconState(int newIconState){
+    this->state = newIconState;
+}
 
 void TrayNoti::setTrayIcon(std::string path){
-    this->icon->addFile("18.png",QSize(22,22));
+    this->icon->addFile(("./twiNotiIcons/" + gayness[gaynessPoint] +"/common.png").c_str(),QSize(22,22));
     trayIcon->setIcon(*icon);
     trayIcon->show();
 }

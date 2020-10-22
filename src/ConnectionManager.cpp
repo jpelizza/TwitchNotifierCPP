@@ -176,7 +176,7 @@ void ConnectionManager::downloadFollowsProfileImages(){
         CURL *image;
         FILE *fp;
         image = curl_easy_init();
-       
+        
         if(image){
             fp = fopen( (this->imgPath + (*index) + ".png").c_str(), "wb");
             if( fp == NULL ) std::cout << "File cannot be opened";

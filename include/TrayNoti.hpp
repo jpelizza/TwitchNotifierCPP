@@ -36,9 +36,15 @@ class TrayNoti : public QObject{
     int screenX, screenY;
     int dataN = 1;
 
+
     public:
     std::string iconPath = "18.png";
+    std::string gayness[5] = {"Default","L","G","B","T"};
+    std::string states[11] = {"common","1","2","3","4","5","6","7","8","9","+"};
+    int gaynessPoint = 0;
+    int NotiPoint = 4;
     std::string auxString;
+    int state = 0;
     TrayNoti(int screenX, int screenY);
     TrayNoti(std::string iconPath);
     void addToActionList(std::vector<struct liveChannelInfo> lciVec);
@@ -46,9 +52,12 @@ class TrayNoti : public QObject{
     void cleanMenu(std::vector<struct liveChannelInfo> lciVec);
     void checkNotifications();
     static void trayOpenLink(std::string chanName);
-    void changeIcon(std::string newIconName);
+    void notiIcon();
+    void changeIcon(int newIconState);
     void loop();
     void changeIconPath();
+    void setIconState(int newIconState);
+    std::vector<QAction*> getActionVec();
 };
 
 #endif
