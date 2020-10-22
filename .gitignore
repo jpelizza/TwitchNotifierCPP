@@ -1,3 +1,9 @@
 tdd.txt
 obj
 bin
+.qmake.stash
+18.png
+*.o
+package-lock.json
+.vscode
+.css-cache
