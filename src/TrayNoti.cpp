@@ -27,7 +27,6 @@ TrayNoti::TrayNoti(std::string iconPath){
     timer           = new QTimer();
     icon            = new QIcon();
 
-    std::cout << trayContextMenu->thread() << std::endl;
     setTrayIcon(iconPath);
     this->iconPath = iconPath;
     trayIcon->setContextMenu(trayContextMenu);
@@ -38,7 +37,7 @@ void TrayNoti::addToActionList(std::vector<struct liveChannelInfo> lciVec){
     QAction *action = new QAction();
     QSignalMapper* signalMapper = new QSignalMapper();
     bool aux = false;
-
+    bool noti = false;
     for(auto vecPointer = lciVec.begin(); vecPointer!=lciVec.end(); vecPointer++){
 
         for(auto it = trayContextMenu->actions().begin(); it!= trayContextMenu->actions().end(); it++){
@@ -47,6 +46,7 @@ void TrayNoti::addToActionList(std::vector<struct liveChannelInfo> lciVec){
             }
         }
         if(!aux){
+            noti = true;
             action->setIcon(QIcon((iconPath+(*vecPointer).userId+".png").c_str()));
             action->setText((*vecPointer).userName.c_str());
             this->auxString = (*(vecPointer)).userName;
@@ -56,41 +56,44 @@ void TrayNoti::addToActionList(std::vector<struct liveChannelInfo> lciVec){
         }
         aux = false;
     }
+    if(noti) notiIcon();
 }
 
 void TrayNoti::addToMenu(){
+
     for(auto vecPointer = actionVec.begin(); vecPointer != actionVec.end();vecPointer++){
         trayContextMenu->addAction(*(vecPointer));
     }
     this->actionVec.clear();
+
 }
 
 void TrayNoti::cleanMenu(std::vector<struct liveChannelInfo> lciVec){
-    bool aux = false;
     int counter = 0;
-    auto trayPointer = trayContextMenu->actions().begin();
+    bool aux = false;
 
-    for(auto trayPointer = trayContextMenu->actions().begin();
-        trayPointer!=trayContextMenu->actions().end();
-        trayPointer++ ){
-
-        std::string auxString = (*trayPointer)->text().toStdString();
+    for(auto trayPointer : trayContextMenu->actions()){
+        std::string auxString = (trayPointer)->text().toStdString();
 
         for(auto it = lciVec.begin(); it!= lciVec.end(); it++){
             if(!(*it).userName.compare((auxString))){
                 aux = true;
+                break;
             }
         }
 
         if(!aux){
-            trayContextMenu->actions().erase(trayPointer);
+            trayContextMenu->removeAction(*(trayContextMenu->actions().begin()+counter));
+            counter--;
         }
+        counter++;
+
         aux = false;
     }
 }
 
-std::vector<QAction*> TrayNoti::getActionVec(){
-    return actionVec;
+int TrayNoti::getTrayContextMenuActionsListSize(){
+    return trayContextMenu->actions().size();
 }
 
 void TrayNoti::trayOpenLink(std::string chanName){
@@ -98,17 +101,15 @@ void TrayNoti::trayOpenLink(std::string chanName){
 }
 
 void TrayNoti::notiIcon(){
-    std::cout << "Stated notiIcon\n";
     QIcon *swapIcon = new QIcon;
-    swapIcon->addFile(("./twiNotiIcons/" + gayness[NotiPoint] + "/" + states[state]+ ".png").c_str(),QSize(22,22));
-    trayIcon->setIcon(*swapIcon);
-    sleep(1);
-    std::cout << "Middle notiIcon\n";
-    swapIcon = new QIcon;
-    swapIcon->addFile(("./twiNotiIcons/" + gayness[gaynessPoint] + "/" + states[state]+ ".png").c_str(),QSize(22,22));
-    trayIcon->setIcon(*swapIcon);
-
-    std::cout << "Ended notiIcon\n";
+    for(int i =0 ; i<2;i++){
+        swapIcon->addFile(("./twiNotiIcons/" + color[notiPoint] + "/" + states[state]+ ".png").c_str(),QSize(22,22));
+        trayIcon->setIcon(*swapIcon);
+        sleep(1);
+        swapIcon->addFile(("./twiNotiIcons/" + color[notiColor] + "/" + states[state]+ ".png").c_str(),QSize(22,22));
+        trayIcon->setIcon(*swapIcon);
+        sleep(1);
+    }
 }
 
 void TrayNoti::changeIcon(int newIconState){
@@ -121,7 +122,7 @@ void TrayNoti::setIconState(int newIconState){
 }
 
 void TrayNoti::setTrayIcon(std::string path){
-    this->icon->addFile(("./twiNotiIcons/" + gayness[gaynessPoint] +"/common.png").c_str(),QSize(22,22));
+    this->icon->addFile(("./twiNotiIcons/" + color[notiColor] +"/common.png").c_str(),QSize(22,22));
     trayIcon->setIcon(*icon);
     trayIcon->show();
 }

@@ -93,7 +93,6 @@ void ConnectionManager::updateLiveChannels(){
         std::stringstream s(cj->readBuffer);
         Json::parseFromStream(cj->rBuilder, s, &cj->root, &cj->errs);
         Json::Value data = cj->root["data"];
-        std::cout << data.size() << "==" << this->liveChannel.size() << std::endl;
         int auxInt = 0;
         for(auto it = this->liveChannel.begin(); it!= this->liveChannel.end();it++){
             (*it).stillStreaming = false;

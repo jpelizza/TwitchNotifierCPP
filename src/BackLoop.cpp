@@ -11,14 +11,15 @@ void BackLoop::run(){
     ConnectionManager cm(fm.getOauth(),fm.path);
     cm.downloadFollowsProfileImages();
     while(true){
+        
         cm.updateFollowers();
         cm.updateLiveChannels();
         tn->addToActionList(cm.liveChannel);
+
         tn->addToMenu();
-        /*TrayIcon AddToActionList*/
-        /*TrayIcon AddToMenu*/
-        //Depricated cm.updateToNotify();
-        sleep(5);
+        
+        
+        sleep(3);
         tn->cleanMenu(cm.liveChannel);
     }
 }
