@@ -33,22 +33,19 @@ ConnectionManager::ConnectionManager(std::string Oauth, std::string path){
 void ConnectionManager::updateClientID(){
     struct curlJsonInfoFetchTeam *cj = new curlJsonInfoFetchTeam;
     cjInit(cj);
-
     if(cj->curl) {
         std::vector<std::string> headers;
         headers.emplace_back(("Authorization: OAuth " + this->Oauth).c_str());
-
         cjAct(cj,headers,"https://id.twitch.tv/oauth2/validate");
-
         std::stringstream s(cj->readBuffer);
         Json::parseFromStream(cj->rBuilder, s, &cj->root, &cj->errs);
-
         this->clientID= cj->root.get("client_id",cj->root).asString();
         this->userID = cj->root.get("user_id",cj->root).asString();
-
         //free memory
         free(cj);
     }
+    std::cout << "B\n";
+
 }
 
 void ConnectionManager::updateFollowers(){

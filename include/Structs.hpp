@@ -1,7 +1,8 @@
 #ifndef STRUCTS
 #define STRUCTS
 
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
+// debian: #include <jsoncpp/json/json.h>
 #include <curl/curl.h>
 struct curlJsonInfoFetchTeam{
     CURL *curl;

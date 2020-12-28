@@ -5,7 +5,8 @@
 #include "../include/FileManager.hpp"
 #include "../include/ConnectionManager.hpp"
 #include "../include/TrayNoti.hpp"
-#include <qt5/QtCore/QThread>
+//#include <qt5/QtCore/QThread>
+#include <qt/QtCore/QThread>
 
 class BackLoop : public QThread{
     private:
